@@ -1,3 +1,10 @@
+security:
+  userRead:
+    name: Daniel
+    pass: leer
+  userWrite:
+    name: Andreas
+    pass: voll
 management:
   endpoints:
     web:

@@ -1,6 +1,7 @@
 package com.droidablebee.springboot.rest.endpoint;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,47 +11,48 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.io.IOException;
-
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * AbstractEndpointTest with common test methods.
  */
-@AutoConfigureMockMvc //this creates MockMvc instance correctly, including wiring of the spring security
+@AutoConfigureMockMvc // this creates MockMvc instance correctly, including wiring of the spring
+                      // security
 public abstract class BaseEndpointTest {
-	protected final Logger logger = LoggerFactory.getLogger(getClass());
+    protected final Logger           logger          = LoggerFactory.getLogger(getClass());
 
-	protected static final MediaType JSON_MEDIA_TYPE = new MediaType(MediaType.APPLICATION_JSON.getType(), MediaType.APPLICATION_JSON.getSubtype());
+    protected static final MediaType JSON_MEDIA_TYPE = new MediaType(MediaType.APPLICATION_JSON.getType(),
+            MediaType.APPLICATION_JSON.getSubtype());
 
-	@Autowired
-    protected WebApplicationContext webApplicationContext;
+    @Autowired
+    protected WebApplicationContext  webApplicationContext;
 
-	@Autowired
-	ObjectMapper objectMapper;
+    @Autowired
+    ObjectMapper                     objectMapper;
 
-	@Autowired
-	protected MockMvc mockMvc;
+    @Autowired
+    protected MockMvc                mockMvc;
 
 //    protected void setup() throws Exception {
 //
 //    	this.mockMvc = webAppContextSetup(webApplicationContext).build();
 //    }
-    
-	/**
-	 * Returns json representation of the object.
-	 * @param o instance
-	 * @return json
-	 * @throws IOException
-	 */
-	protected String json(Object o) throws IOException {
 
-		return objectMapper.writeValueAsString(o);
-	}
+    /**
+     * Returns json representation of the object.
+     * 
+     * @param o instance
+     * @return json
+     * @throws IOException
+     */
+    protected String json(Object o) throws IOException {
 
-	protected SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor jwtWithScope(String scope) {
+        return objectMapper.writeValueAsString(o);
+    }
 
-		return jwt(jwt -> jwt.claims(claims -> claims.put("scope", scope)));
-	}
+    protected SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor jwtWithScope(String scope) {
+        return SecurityMockMvcRequestPostProcessors.jwt()
+                .jwt(jwt -> jwt.claims(claims -> claims.put("scope", scope)));
+    }
 
 }
