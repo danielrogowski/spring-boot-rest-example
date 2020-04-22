@@ -49,6 +49,8 @@ public class PersonEndpointTest extends BaseEndpointTest {
     @Autowired
     private PersonService personService;
 
+    @Autowired
+
     private Person        testPerson;
     private long          timestamp;
 

@@ -1,7 +1,10 @@
 package com.droidablebee.springboot.rest.config;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,39 +18,66 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-
-    public static final String ROLE_NAME_USER_READ  = "USER_READ";
-    public static final String ROLE_NAME_USER_WRITE = "USER_WRITE";
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(WebSecurityConfig.class);
 
     @Value("${security.userRead.name}")
-    private String             userReadName;
+    private String              userReadName;
     @Value("${security.userRead.pass}")
-    private String             userReadPass;
+    private String              userReadPass;
     @Value("${security.userWrite.name}")
-    private String             userWriteName;
+    private String              userWriteName;
     @Value("${security.userWrite.pass}")
-    private String             userWritePass;
+    private String              userWritePass;
 
     @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
-    private String             issuerUri;
+    private String              issuerUri;
 
     @Value("${app.security.ignore:/swagger/**, /swagger-resources/**, /swagger-ui.html, /webjars/**, /v2/api-docs, /actuator/info}")
-    private String[]           ignorePatterns;
+    private String[]            ignorePatterns;
+
+    @Value("#{ROLE_USER_READ:USER_READ}")
+    private String              roleUserRead;
+
+    @Value("#{ROLE_USER_WRITE:USER_WRITE}")
+    private String              roleUserWrite;
+
+    @Bean
+    public String roleUserRead(@Value("${ROLE_USER_READ:USER_READ}") final String roleUserRead) {
+        return roleUserRead;
+    }
+
+    @Bean
+    public String roleUserWrite(@Value("${ROLE_USER_WRITE:USER_WRITE}") final String roleUserWrite) {
+        return roleUserWrite;
+    }
+
+//    @Bean(name = "ROLE_USER_READ")
+//    public String roleUserRead() {
+//        return ROLE_USER_READ;
+//    }
+
+//    @Bean(name = "ROLE_USER_WRITE")
+//    public String roleUserWrite() {
+//        return ROLE_USER_WRITE;
+//    }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        System.out.println("userReadName: " + userReadName);
-        System.out.println("userReadPass: " + userReadPass);
-        System.out.println("userWriteName: " + userWriteName);
+        LOG.info("userReadName: {}", userReadName);
+        LOG.info("userReadPass: {}", userReadPass);
+        LOG.info("userWriteName: {}", userWriteName);
+        LOG.info("userWritePass: {}", userWritePass);
+        LOG.info("roleUserRead: {}", roleUserRead);
+        LOG.info("roleUserWrite: {}", roleUserWrite);
         System.out.println("userWritePass: " + userWritePass);
         auth.inMemoryAuthentication()
                 .withUser(userReadName)
                 .password(userReadPass)
-                .roles(ROLE_NAME_USER_READ)
+                .roles(roleUserRead)
                 .and()
                 .withUser(userWriteName)
                 .password(userWritePass)
-                .roles(ROLE_NAME_USER_WRITE);
+                .roles(roleUserWrite);
     }
 
     @Override
@@ -59,28 +89,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf()
                 .disable(); // do not require SCRF for POST and PUT
 
-        // make sure principal is created for the health endpoint to verify the role
         http.authorizeRequests()
+                // make sure principal is created for the health endpoint to verify the role
                 .antMatchers("/actuator/health")
-                .permitAll();
-
-        // die brauche ich nicht, weil ich es direkt im Controller auf Ebene der Methode
-        // mache
-        http.authorizeRequests()
-//                .mvcMatchers(HttpMethod.PUT, "/v1/person**")
-//                .hasAuthority(ROLE_NAME_USER_WRITE)
-                .anyRequest()
-                .authenticated()
+                .permitAll()
+                .and()
+                .authorizeRequests()
+                .mvcMatchers(HttpMethod.PUT, "/v1/**")
+                .hasAuthority(roleUserWrite)
+                .and()
+                .authorizeRequests()
+                .mvcMatchers(HttpMethod.GET, "/v1/**")
+                .hasAuthority(roleUserRead)
                 .and()
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
-
-//        http.authorizeRequests()
-////                .mvcMatchers(HttpMethod.GET, "/v1/person**")
-////                .hasAuthority(ROLE_NAME_USER_READ)
-//                .anyRequest()
-//                .authenticated()
-//                .and()
-//                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
     }
 
     @Override
