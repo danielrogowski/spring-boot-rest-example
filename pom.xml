@@ -12,11 +12,11 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.2.4.RELEASE</version>
+		<version>2.2.6.RELEASE</version>
 	</parent>
 
 	<properties>
-		<java.version>1.8</java.version>
+		<java.version>1.13</java.version>
 	</properties>
 
 	<dependencies>
@@ -46,8 +46,7 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-xml</artifactId>
-			<version>2.9.4</version>
-		</dependency>
+			</dependency>
 
 		<!-- swagger -->
 		<dependency>
@@ -65,8 +64,7 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<version>1.4.192</version>
-		</dependency>
+			</dependency>
 
 		<!-- test -->
 		<dependency>
